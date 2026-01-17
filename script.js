@@ -8,6 +8,7 @@ const gridHeight = 115;
 const jitter = 0;    
 const minPageMargin = 0; // We want AT LEAST this much space on sides
 
+
 function generateGrid() {
     // 1. CLEAR PREVIOUS STATE
     container.innerHTML = '';
@@ -120,6 +121,13 @@ function animateRandomStreak() {
 window.addEventListener('load', () => {
     generateGrid();
     animateRandomStreak();
+
+    const emailBtn = document.getElementById('email-btn');
+    const user = 'christine.kaeserchen'; // Change this
+    const domain = 'gmail.com';      // Change this
+    if (emailBtn) {
+        emailBtn.href = 'mailto:' + user + '@' + domain;
+    }
 });
 
 window.addEventListener('resize', () => {
