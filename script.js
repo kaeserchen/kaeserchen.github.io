@@ -6,57 +6,68 @@ let resizeTimer;
 const gridWidth = 90;   
 const gridHeight = 115; 
 const jitter = 0;    
-const pageMargin = 0; // Controls the "Blue Box" margin from screen edges
+const minPageMargin = 0; // We want AT LEAST this much space on sides
 
 function generateGrid() {
     // 1. CLEAR PREVIOUS STATE
     container.innerHTML = '';
     streaks = [];
 
-    // 2. RECALCULATE DIMENSIONS
+    // 2. GET DIMENSIONS
     const w = window.innerWidth;
     const h = window.innerHeight;
 
-    // Calculate available space minus the safety margins
-    const availableWidth = w - (pageMargin * 2);
-    const availableHeight = h - (pageMargin * 2);
+    // 3. CALCULATE COLUMNS/ROWS BASED ON SAFE MARGINS
+    // We reserve space (minPageMargin * 2) to ensure we don't touch edges,
+    // then see how many columns fit in the remaining space.
+    const safeWidth = w - (minPageMargin * 2);
+    const safeHeight = h - (minPageMargin * 2);
 
-    // Ensure we don't get negative values on very small screens
-    if (availableWidth <= 0 || availableHeight <= 0) return;
+    if (safeWidth <= 0 || safeHeight <= 0) return;
 
-    const cols = Math.floor(availableWidth / gridWidth);
-    const rows = Math.floor(availableHeight / gridHeight);
+    // How many grid cells fit?
+    // We add 1 to the division to account for the fact that a grid 
+    // is points, not just gaps. But strict floor is safer to prevent overflow.
+    const cols = Math.floor(safeWidth / gridWidth);
+    const rows = Math.floor(safeHeight / gridHeight);
+    
+    // 4. CALCULATE EXACT CENTERING (Fixing the "Uneven" issue)
+    // The "Used Space" is the distance from the first grid point to the last grid point,
+    // PLUS the jitter amount (since points scatter slightly right/down).
+    const visualGridWidth = ((cols - 1) * gridWidth) + jitter;
+    const visualGridHeight = ((rows - 1) * gridHeight) + jitter;
 
-    // Center the grid within the available safe zone
-    const xOffset = pageMargin + (availableWidth - (cols * gridWidth)) / 2;
-    const yOffset = pageMargin + (availableHeight - (rows * gridHeight)) / 2;
+    // Determine the exact starting offsets to center that Visual Grid
+    const xOffset = (w - visualGridWidth) / 2;
+    const yOffset = (h - visualGridHeight) / 2;
 
-    // --- DYNAMIC EXCLUSION ZONE ---
+    // --- CONTENT EXCLUSION ZONES ---
     const contentWrapper = document.querySelector('.content-wrapper');
     let excludeRect = null;
     
     if (contentWrapper) {
         const rect = contentWrapper.getBoundingClientRect();
         
-        // FIX: Tighter boundaries to reduce "blank space" (Yellow Box)
-        // We shrink the exclusion box slightly so confetti can enter the padding area
+        // Shrink the box slightly so confetti gets closer to the text
         excludeRect = {
-            left: rect.left - 20,    // Allow confetti slightly into side padding
+            left: rect.left - 10,    
             right: rect.right - 10,  
-            top: rect.top - 40,      // Allow confetti closer to the top Title
-            bottom: rect.bottom - 30 // Allow confetti closer to bottom Links
+            top: rect.top + 10,      
+            bottom: rect.bottom - 20 
         };
     }
 
-    // 3. GENERATE CONFETTI
+    // 5. GENERATE CONFETTI
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             
+            // Base Grid Position
             let baseX = xOffset + (c * gridWidth);
             let baseY = yOffset + (r * gridHeight);
 
+            // Add Random Jitter
             let x = baseX + (Math.random() * jitter);
-            let y = baseY + (Math.random() * jitter);
+            let y = baseY + (Math.random() * jitter) - 20;
 
             // CHECK: Is this point inside the "No Fly Zone"?
             if (excludeRect) {
