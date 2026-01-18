@@ -118,14 +118,30 @@ function animateRandomStreak() {
 }
 
 // --- INITIALIZATION ---
+// Use ResizeObserver to watch for size changes. This is more robust than
+// window.resize for initial load layout stability + handling mobile address bars.
+const resizeObserver = new ResizeObserver(entries => {
+    // Debounce the grid regeneration
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        // We check window.innerWidth to ensure we don't regenerate for vertical-only
+        // changes (like mobile address bar scroll), unless the width actually changed.
+        if (Math.abs(window.innerWidth - lastWidth) > 0) {
+            lastWidth = window.innerWidth;
+            generateGrid();
+        }
+    }, 100);
+});
+
 window.addEventListener('load', () => {
-    // Use requestAnimationFrame to ensure the browser has completed layout
-    // before measuring dimensions. This fixes confetti not covering the full
-    // range when opening in a new tab.
-    requestAnimationFrame(() => {
-        generateGrid();
-    });
+    // Initial generation (in case Observer takes a moment or doesn't fire if size doesn't change from 0 - unlikely)
+    // Actually, ResizeObserver fires immediately when observing, so we can rely on it mostly,
+    // but calling it once ensures we have content ASAP.
+    generateGrid();
     animateRandomStreak();
+
+    // Start observing the body (which fills the view)
+    resizeObserver.observe(document.body);
 
     const emailBtn = document.getElementById('email-btn');
     const user = 'christine.kaeserchen'; // Change this
@@ -137,17 +153,4 @@ window.addEventListener('load', () => {
 
 // Store the width to compare later
 let lastWidth = window.innerWidth;
-
-window.addEventListener('resize', () => {
-    // If the width hasn't changed, it's just a mobile scroll (address bar). 
-    // Do nothing.
-    if (window.innerWidth === lastWidth) return;
-
-    // Update the new width
-    lastWidth = window.innerWidth;
-
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-        generateGrid();
-    }, 200);
-});
+// Remove the old window.resize listener (it's replaced by ResizeObserver)
