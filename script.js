@@ -119,7 +119,12 @@ function animateRandomStreak() {
 
 // --- INITIALIZATION ---
 window.addEventListener('load', () => {
-    generateGrid();
+    // Use requestAnimationFrame to ensure the browser has completed layout
+    // before measuring dimensions. This fixes confetti not covering the full
+    // range when opening in a new tab.
+    requestAnimationFrame(() => {
+        generateGrid();
+    });
     animateRandomStreak();
 
     const emailBtn = document.getElementById('email-btn');
