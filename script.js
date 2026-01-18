@@ -1,11 +1,11 @@
 const container = document.getElementById('streak-container');
-let streaks = []; 
-let resizeTimer; 
+let streaks = [];
+let resizeTimer;
 
 // GRID SETTINGS
-const gridWidth = 90;   
-const gridHeight = 115; 
-const jitter = 0;    
+const gridWidth = 90;
+const gridHeight = 115;
+const jitter = 0;
 const minPageMargin = 0; // We want AT LEAST this much space on sides
 
 
@@ -31,7 +31,7 @@ function generateGrid() {
     // is points, not just gaps. But strict floor is safer to prevent overflow.
     const cols = Math.floor(safeWidth / gridWidth);
     const rows = Math.floor(safeHeight / gridHeight);
-    
+
     // 4. CALCULATE EXACT CENTERING (Fixing the "Uneven" issue)
     // The "Used Space" is the distance from the first grid point to the last grid point,
     // PLUS the jitter amount (since points scatter slightly right/down).
@@ -45,23 +45,23 @@ function generateGrid() {
     // --- CONTENT EXCLUSION ZONES ---
     const contentWrapper = document.querySelector('.content-wrapper');
     let excludeRect = null;
-    
+
     if (contentWrapper) {
         const rect = contentWrapper.getBoundingClientRect();
-        
+
         // Shrink the box slightly so confetti gets closer to the text
         excludeRect = {
-            left: rect.left,    
-            right: rect.right,  
-            top: rect.top - 10,      
-            bottom: rect.bottom, 
+            left: rect.left,
+            right: rect.right,
+            top: rect.top - 30,
+            bottom: rect.bottom,
         };
     }
 
     // 5. GENERATE CONFETTI
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-            
+
             // Base Grid Position
             let baseX = xOffset + (c * gridWidth);
             let baseY = yOffset + (r * gridHeight);
@@ -72,15 +72,15 @@ function generateGrid() {
 
             // CHECK: Is this point inside the "No Fly Zone"?
             if (excludeRect) {
-                if (x > excludeRect.left && x < excludeRect.right && 
+                if (x > excludeRect.left && x < excludeRect.right &&
                     y > excludeRect.top && y < excludeRect.bottom) {
-                    continue; 
+                    continue;
                 }
             }
 
             const el = document.createElement('div');
             el.classList.add('streak');
-            
+
             el.style.left = x + 'px';
             el.style.top = y + 'px';
 
@@ -95,7 +95,7 @@ function generateGrid() {
 }
 
 // --- ANIMATION LOGIC ---
-const movementDuration = 1500; 
+const movementDuration = 1500;
 
 function animateRandomStreak() {
     if (streaks.length > 0) {
@@ -105,7 +105,7 @@ function animateRandomStreak() {
         if (streak) {
             let currentRot = parseFloat(streak.dataset.rotation);
             let newRot = currentRot + 180;
-            
+
             streak.style.transform = `rotate(${newRot}deg)`;
             streak.dataset.rotation = newRot;
         }
@@ -144,5 +144,5 @@ window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
         generateGrid();
-    }, 200); 
+    }, 200);
 });
