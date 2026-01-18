@@ -51,10 +51,10 @@ function generateGrid() {
         
         // Shrink the box slightly so confetti gets closer to the text
         excludeRect = {
-            left: rect.left - 10,    
-            right: rect.right - 10,  
-            top: rect.top + 10,      
-            bottom: rect.bottom - 20 
+            left: rect.left,    
+            right: rect.right,  
+            top: rect.top - 10,      
+            bottom: rect.bottom, 
         };
     }
 
@@ -130,7 +130,17 @@ window.addEventListener('load', () => {
     }
 });
 
+// Store the width to compare later
+let lastWidth = window.innerWidth;
+
 window.addEventListener('resize', () => {
+    // If the width hasn't changed, it's just a mobile scroll (address bar). 
+    // Do nothing.
+    if (window.innerWidth === lastWidth) return;
+
+    // Update the new width
+    lastWidth = window.innerWidth;
+
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
         generateGrid();

@@ -65,7 +65,10 @@ main {
     flex-direction: column;
     align-items: flex-start; 
     text-align: left;
-    /* Added background purely for logic? No, let's keep transparent. */
+
+    background-color: var(--bg-color); /* Matches page background (white) */
+    position: relative; /* Ensures it sits above the fixed background */
+    z-index: 2; /* Explicitly places it above the streaks */
 }
 
 h1 {
